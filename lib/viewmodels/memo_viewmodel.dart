@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:math'; // Necesario para la función max()
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:memorama/models/card_item.dart';
 
-class MemoProvider with ChangeNotifier {
+class MemoViewModel with ChangeNotifier {
   final List<IconData> _icons = [
     Icons.star, Icons.favorite, Icons.lightbulb, Icons.ac_unit,
     Icons.anchor, Icons.whatshot, Icons.camera_alt, Icons.pets,
@@ -13,9 +13,7 @@ class MemoProvider with ChangeNotifier {
   CardItem? _firstSelection;
   CardItem? _secondSelection;
 
-  // ¡CAMBIO! El score ahora es 'double' para manejar decimales
   double _score = 0.0;
-
   int _attempts = 0;
   Timer? _timer;
   int _secondsElapsed = 0;
@@ -23,18 +21,18 @@ class MemoProvider with ChangeNotifier {
   bool _isHelpActive = false;
   bool _isGameStarted = false;
 
-  // Getters actualizados
+  bool _shouldShowDialog = false;
+
   List<CardItem> get cards => _cards;
-  double get score => _score; // Devuelve un double
+  double get score => _score;
   int get attempts => _attempts;
   int get secondsElapsed => _secondsElapsed;
   bool get isGameFinished => _cards.isNotEmpty && _cards.every((c) => c.status == CardStatus.matched);
   bool get isGameStarted => _isGameStarted;
-
-  // ¡NUEVO GETTER! Para verificar la condición de victoria
   bool get didPlayerWin => isGameFinished && _score >= 60;
+  bool get shouldShowDialog => _shouldShowDialog;
 
-  MemoProvider() {
+  MemoViewModel() {
     _setupBoard();
   }
 
@@ -59,16 +57,18 @@ class MemoProvider with ChangeNotifier {
   void resetGame() {
     _stopTimer();
     _setupBoard();
-
-    // ¡CAMBIO! Resetea el score a 0.0
     _score = 0.0;
-
     _attempts = 0;
     _secondsElapsed = 0;
     _isGameActive = false;
     _isGameStarted = false;
+    _shouldShowDialog = false;
     _clearSelections();
     notifyListeners();
+  }
+
+  void dialogWasShown() {
+    _shouldShowDialog = false;
   }
 
   void onCardPressed(CardItem card) {
@@ -88,19 +88,16 @@ class MemoProvider with ChangeNotifier {
 
   void _checkMatch() {
     if (_firstSelection?.id == _secondSelection?.id) {
-      // ¡CAMBIO! Suma 12.5 puntos por acierto
       _score += 12.5;
-
       _updateCardStatus(_firstSelection!, CardStatus.matched);
       _updateCardStatus(_secondSelection!, CardStatus.matched);
       _clearSelections();
       if (isGameFinished) {
         _stopTimer();
+        _shouldShowDialog = true;
       }
     } else {
-      // ¡CAMBIO! Resta 2 puntos por error
-      _score = max(0.0, _score - 2); // 'max' evita que el puntaje sea negativo
-
+      _score = max(0.0, _score - 2);
       Future.delayed(const Duration(milliseconds: 800), () {
         if (_firstSelection != null && _secondSelection != null) {
           _updateCardStatus(_firstSelection!, CardStatus.hidden);
@@ -114,11 +111,9 @@ class MemoProvider with ChangeNotifier {
 
   void showHelp() async {
     if (!_isGameActive || !_isGameStarted) return;
-
-    // ¡CAMBIO! Resta 15 puntos por usar la ayuda
     _score = max(0.0, _score - 15);
-
     _isHelpActive = true;
+
     for (var card in _cards) {
       if (card.status == CardStatus.hidden) {
         _updateCardStatus(card, CardStatus.visible);
@@ -136,14 +131,11 @@ class MemoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // El resto de los métodos auxiliares no necesitan cambios
   void _updateCardStatus(CardItem card, CardStatus status) {
-    try {
-      final index = _cards.indexWhere((c) => c == card);
-      if(index != -1){
-        _cards[index].status = status;
-      }
-    } catch (e) {/*...*/}
+    final index = _cards.indexWhere((c) => c == card);
+    if(index != -1){
+      _cards[index].status = status;
+    }
   }
 
   void _clearSelections() {

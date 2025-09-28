@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Enum para representar los posibles estados de una carta
 enum CardStatus { hidden, visible, matched }
 
 class CardItem {
@@ -14,7 +13,6 @@ class CardItem {
     this.status = CardStatus.hidden,
   });
 
-  // Método para facilitar la creación de copias del objeto
   CardItem copyWith({CardStatus? status}) {
     return CardItem(
       id: id,

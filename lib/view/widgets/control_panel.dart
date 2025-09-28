@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memorama/provider/memo_provider.dart';
+import 'package:memorama/viewmodels/memo_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class ControlPanel extends StatelessWidget {
@@ -7,11 +7,11 @@ class ControlPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MemoProvider>(
-      builder: (context, provider, child) {
-        final minutes = (provider.secondsElapsed / 60).floor().toString().padLeft(2, '0');
-        final seconds = (provider.secondsElapsed % 60).toString().padLeft(2, '0');
-        final bool isGameStarted = provider.isGameStarted;
+    return Consumer<MemoViewModel>(
+      builder: (context, viewModel, child) {
+        final minutes = (viewModel.secondsElapsed / 60).floor().toString().padLeft(2, '0');
+        final seconds = (viewModel.secondsElapsed % 60).toString().padLeft(2, '0');
+        final bool isGameStarted = viewModel.isGameStarted;
 
         return Padding(
           padding: const EdgeInsets.all(12.0),
@@ -20,10 +20,9 @@ class ControlPanel extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  // ¡CAMBIO! Se formatea el puntaje para mostrar un decimal
-                  _buildInfoCard('Puntos', provider.score.toStringAsFixed(1)),
+                  _buildInfoCard('Puntos', viewModel.score.toStringAsFixed(1)),
                   _buildInfoCard('Tiempo', '$minutes:$seconds'),
-                  _buildInfoCard('Intentos', provider.attempts.toString()),
+                  _buildInfoCard('Intentos', viewModel.attempts.toString()),
                 ],
               ),
               const SizedBox(height: 16),
@@ -31,7 +30,7 @@ class ControlPanel extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: isGameStarted ? () => provider.resetGame() : null,
+                    onPressed: isGameStarted ? () => viewModel.resetGame() : null,
                     icon: const Icon(Icons.refresh),
                     label: const Text('Reiniciar'),
                     style: ElevatedButton.styleFrom(
@@ -40,7 +39,7 @@ class ControlPanel extends StatelessWidget {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: isGameStarted ? () => provider.showHelp() : null,
+                    onPressed: isGameStarted ? () => viewModel.showHelp() : null,
                     icon: const Icon(Icons.help_outline),
                     label: const Text('Ayuda'),
                     style: ElevatedButton.styleFrom(

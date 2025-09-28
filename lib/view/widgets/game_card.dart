@@ -16,7 +16,6 @@ class GameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      // AnimatedSwitcher es genial para animar entre dos widgets (frente y dorso)
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 500),
         transitionBuilder: (Widget child, Animation<double> animation) {
@@ -42,10 +41,8 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  // Construye el widget de la cara de la carta según su estado
   Widget _buildCardFace() {
     if (card.status == CardStatus.hidden) {
-      // Dorso de la carta
       return Card(
         key: const ValueKey(true),
         color: Colors.blueGrey,
@@ -54,7 +51,6 @@ class GameCard extends StatelessWidget {
         ),
       );
     } else {
-      // Frente de la carta
       return Card(
         key: const ValueKey(false),
         color: card.status == CardStatus.matched ? Colors.green.withOpacity(0.7) : Colors.white,
